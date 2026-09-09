@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
 import '../../core/utils.dart';
 import '../../models/booking.dart';
-import '../common/action_button.dart';
 
 class BookingCard extends StatelessWidget {
   const BookingCard({
@@ -17,89 +15,174 @@ class BookingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.panel,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Slot ${booking.slotId}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ),
-              Text(
-                booking.id,
-                style: const TextStyle(
-                  color: Color(0xFFE7E8F1),
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0,
-                ),
-              ),
-            ],
+          _header(),
+          const SizedBox(height: 20),
+          Divider(
+            color: Colors.grey.withValues(alpha: 0.18),
           ),
           const SizedBox(height: 12),
-          BookingDetailRow(icon: Icons.place, label: booking.location),
-          BookingDetailRow(icon: Icons.schedule, label: booking.timeRange),
-          BookingDetailRow(
-            icon: Icons.login,
-            label:
-                '${AppUtils.formatDate(booking.entryDate)} ${AppUtils.formatTimeOfDay(booking.entryTime)}',
+          _detailRow(
+            Icons.local_parking,
+            'Slot',
+            booking.slotId,
           ),
-          BookingDetailRow(
-            icon: Icons.logout,
-            label:
-                '${AppUtils.formatDate(booking.exitDate)} ${AppUtils.formatTimeOfDay(booking.exitTime)}',
+          _detailRow(
+            Icons.location_on_outlined,
+            'Parking Location',
+            booking.location,
           ),
-          const SizedBox(height: 14),
-          ActionButton(
-            label: 'Cancel Booking',
-            color: AppColors.occupied,
-            foregroundColor: Colors.white,
-            onPressed: onCancel,
+          _detailRow(
+            Icons.calendar_today_outlined,
+            'Entry Date',
+            AppUtils.formatDate(booking.entryDate),
+          ),
+          _detailRow(
+            Icons.calendar_today_outlined,
+            'Exit Date',
+            AppUtils.formatDate(booking.exitDate),
+          ),
+          _detailRow(
+            Icons.login,
+            'Entry Time',
+            AppUtils.formatTimeOfDay(booking.entryTime),
+          ),
+          _detailRow(
+            Icons.logout,
+            'Exit Time',
+            AppUtils.formatTimeOfDay(booking.exitTime),
+            removeBottomPadding: true,
+          ),
+          const SizedBox(height: 16),
+          Divider(
+            color: Colors.grey.withValues(alpha: 0.18),
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton(
+              onPressed: onCancel,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE52424),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              child: const Text(
+                'Cancel Booking',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-class BookingDetailRow extends StatelessWidget {
-  const BookingDetailRow({
-    required this.icon,
-    required this.label,
-    super.key,
-  });
+  Widget _header() {
+    return Row(
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE8EDF5),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Center(
+            child: Text(
+              'P',
+              style: TextStyle(
+                color: Color(0xFF3269B3),
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        const Expanded(
+          child: Text(
+            'Parking Booking',
+            style: TextStyle(
+              color: Color(0xFF303B4A),
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        Text(
+          booking.id,
+          style: const TextStyle(
+            color: Color(0xFF748093),
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
 
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _detailRow(
+      IconData icon,
+      String label,
+      String value, {
+        bool removeBottomPadding = false,
+      }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(
+        bottom: removeBottomPadding ? 0 : 16,
+      ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.78), size: 18),
-          const SizedBox(width: 9),
+          SizedBox(
+            width: 22,
+            child: Icon(
+              icon,
+              color: const Color(0xFF3269B3),
+              size: 21,
+            ),
+          ),
+          const SizedBox(width: 13),
           Expanded(
             child: Text(
               label,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.84),
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0,
+              style: const TextStyle(
+                color: Color(0xFF748093),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: Color(0xFF303B4A),
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),

@@ -21,6 +21,8 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool _isLoading = false;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -31,49 +33,148 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            const Spacer(flex: 2),
-            const Text(
-              'Login',
-              style: TextStyle(
-                color: AppColors.textDark,
-                fontSize: 27,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0,
-              ),
-            ),
-            const SizedBox(height: 48),
-            AuthTextField(
-              controller: _emailController,
-              hintText: 'Email',
-              keyboardType: TextInputType.emailAddress,
-              validator: AppUtils.validateEmail,
-            ),
-            const SizedBox(height: 28),
-            AuthTextField(
-              controller: _passwordController,
-              hintText: 'Password',
-              obscureText: true,
-              validator: AppUtils.validatePassword,
-            ),
-            const SizedBox(height: 40),
-            PrimaryPillButton(label: 'Login', onPressed: _submit),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Back',
-                style: TextStyle(
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.w700,
+      child: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Spacer(),
+
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: AppColors.authPrimary,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.authPrimary.withValues(alpha: 0.25),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.local_parking_rounded,
+                  color: Colors.white,
+                  size: 30,
                 ),
               ),
-            ),
-            const Spacer(flex: 3),
-          ],
+
+              const SizedBox(height: 28),
+
+              const Text(
+                'Welcome back',
+                style: TextStyle(
+                  color: AppColors.navy,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.8,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text(
+                'Sign in to manage your parking bookings.',
+                style: TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+              ),
+
+              const SizedBox(height: 42),
+
+              const Text(
+                'EMAIL ADDRESS',
+                style: TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              AuthTextField(
+                controller: _emailController,
+                hintText: 'Enter your email',
+                keyboardType: TextInputType.emailAddress,
+                validator: AppUtils.validateEmail,
+              ),
+
+              const SizedBox(height: 24),
+
+              const Text(
+                'PASSWORD',
+                style: TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              AuthTextField(
+                controller: _passwordController,
+                hintText: 'Enter your password',
+                obscureText: true,
+                validator: AppUtils.validatePassword,
+              ),
+
+              const SizedBox(height: 36),
+
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(),
+                )
+              else
+                PrimaryPillButton(
+                  label: 'Login',
+                  onPressed: _submit,
+                ),
+
+              const SizedBox(height: 20),
+
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    size: 18,
+                  ),
+                  label: const Text('Back to welcome'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.textDark,
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const Spacer(),
+
+              Center(
+                child: Text(
+                  'SMART PARKING SYSTEM',
+                  style: TextStyle(
+                    color: AppColors.textDark.withValues(alpha: 0.45),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 18),
+            ],
+          ),
         ),
       ),
     );
@@ -82,17 +183,25 @@ class _LoginPageState extends State<LoginPage> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final emailName = _emailController.text.trim().split('@').first;
-    widget.controller.handleAuthentication(emailName);
-    _openHome();
-  }
+    setState(() {
+      _isLoading = true;
+    });
 
-  void _openHome() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (_) => NearestParkingPage(controller: widget.controller),
-      ),
-      (route) => false,
-    );
+    final emailName = _emailController.text.trim().split('@').first;
+
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+
+      widget.controller.handleAuthentication(emailName);
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => NearestParkingPage(
+            controller: widget.controller,
+          ),
+        ),
+            (route) => false,
+      );
+    });
   }
 }

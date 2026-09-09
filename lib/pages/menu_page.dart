@@ -6,10 +6,14 @@ import '../widgets/common/page_header.dart';
 import '../widgets/parking/menu_action_tile.dart';
 import 'nearest_parking_page.dart';
 import 'bookings_page.dart';
+import 'booking_history_page.dart';
 import 'welcome_page.dart';
 
 class MenuPage extends StatefulWidget {
-  const MenuPage({required this.controller, super.key});
+  const MenuPage({
+    required this.controller,
+    super.key,
+  });
 
   final ParkingController controller;
 
@@ -31,7 +35,9 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   void _onStateChange() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -51,16 +57,28 @@ class _MenuPageState extends State<MenuPage> {
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(22, 10, 22, 28),
+                padding: const EdgeInsets.fromLTRB(
+                  22,
+                  10,
+                  22,
+                  28,
+                ),
                 children: [
-                  _buildProfileHeader(userName, bookingCount),
+                  _buildProfileHeader(
+                    userName,
+                    bookingCount,
+                  ),
                   const SizedBox(height: 18),
                   MenuActionTile(
                     icon: Icons.home,
                     title: 'Find Parking',
                     onTap: () {
                       Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => NearestParkingPage(controller: widget.controller)),
+                        MaterialPageRoute(
+                          builder: (_) => NearestParkingPage(
+                            controller: widget.controller,
+                          ),
+                        ),
                         (route) => false,
                       );
                     },
@@ -68,10 +86,29 @@ class _MenuPageState extends State<MenuPage> {
                   MenuActionTile(
                     icon: Icons.bookmark,
                     title: 'My Bookings',
-                    badge: bookingCount == 0 ? null : bookingCount.toString(),
+                    badge: bookingCount == 0
+                        ? null
+                        : bookingCount.toString(),
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => BookingsPage(controller: widget.controller)),
+                        MaterialPageRoute(
+                          builder: (_) => BookingsPage(
+                            controller: widget.controller,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  MenuActionTile(
+                    icon: Icons.history,
+                    title: 'Booking History',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => BookingHistoryPage(
+                            controller: widget.controller,
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -80,7 +117,12 @@ class _MenuPageState extends State<MenuPage> {
                     title: 'Reset Demo Data',
                     onTap: () {
                       widget.controller.resetDemoData();
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Demo data reset')));
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Demo data reset'),
+                        ),
+                      );
                     },
                   ),
                   MenuActionTile(
@@ -92,7 +134,9 @@ class _MenuPageState extends State<MenuPage> {
                         applicationName: 'Smart Parking System',
                         applicationVersion: '1.0.0',
                         children: const [
-                          Text('A dynamic prototype for finding, booking, and managing parking slots.'),
+                          Text(
+                            'A dynamic prototype for finding, booking, and managing parking slots.',
+                          ),
                         ],
                       );
                     },
@@ -112,7 +156,10 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Widget _buildProfileHeader(String userName, int bookingCount) {
+  Widget _buildProfileHeader(
+    String userName,
+    int bookingCount,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -130,7 +177,6 @@ class _MenuPageState extends State<MenuPage> {
                 color: AppColors.authPrimary,
                 fontSize: 24,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 0,
               ),
             ),
           ),
@@ -146,16 +192,16 @@ class _MenuPageState extends State<MenuPage> {
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '$bookingCount active booking${bookingCount == 1 ? '' : 's'}',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.78),
+                    color: Colors.white.withValues(
+                      alpha: 0.78,
+                    ),
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 0,
                   ),
                 ),
               ],
@@ -166,20 +212,28 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Future<void> _confirmLogout(BuildContext context) async {
+  Future<void> _confirmLogout(
+    BuildContext context,
+  ) async {
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Logout'),
-          content: const Text('Return to the welcome screen?'),
+          content: const Text(
+            'Return to the welcome screen?',
+          ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
               child: const Text('Stay'),
             ),
             FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
               child: const Text('Logout'),
             ),
           ],
@@ -187,12 +241,19 @@ class _MenuPageState extends State<MenuPage> {
       },
     );
 
-    if (shouldLogout == true && context.mounted) {
-      widget.controller.logout();
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => WelcomePage(controller: widget.controller)),
-        (route) => false,
-      );
+    if (shouldLogout != true || !context.mounted) {
+      return;
     }
+
+    widget.controller.logout();
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => WelcomePage(
+          controller: widget.controller,
+        ),
+      ),
+      (route) => false,
+    );
   }
 }

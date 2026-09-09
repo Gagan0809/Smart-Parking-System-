@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'core/constants.dart';
-import 'controllers/parking_controller.dart';
-import 'pages/welcome_page.dart';
+import 'package:capstone_project/core/constants.dart';
+import 'package:capstone_project/controllers/parking_controller.dart';
+import 'package:capstone_project/pages/welcome_page.dart';
 
 void main() {
   runApp(const SmartParkingApp());
@@ -15,13 +15,7 @@ class SmartParkingApp extends StatefulWidget {
 }
 
 class _SmartParkingAppState extends State<SmartParkingApp> {
-  late final ParkingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = ParkingController();
-  }
+  final _controller = ParkingController();
 
   @override
   void dispose() {
@@ -35,10 +29,11 @@ class _SmartParkingAppState extends State<SmartParkingApp> {
       debugShowCheckedModeBanner: false,
       title: 'Smart Parking System',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.authPrimary),
-        scaffoldBackgroundColor: AppColors.authBackground,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.authPrimary,
+          surface: AppColors.authBackground,
+        ),
         useMaterial3: true,
-        fontFamily: 'Roboto',
       ),
       home: WelcomePage(controller: _controller),
     );
