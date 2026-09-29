@@ -28,7 +28,6 @@ public class JwtService {
     }
 
     public String generateToken(String email, String role) {
-
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expiration);
 
@@ -43,6 +42,10 @@ public class JwtService {
 
     public String extractEmail(String token) {
         return getClaims(token).getSubject();
+    }
+
+    public String extractRole(String token) {
+        return getClaims(token).get("role", String.class);
     }
 
     public boolean isTokenValid(String token) {

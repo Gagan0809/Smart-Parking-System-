@@ -14,6 +14,9 @@ public class ParkingSlot {
     private String slotId;
     private String location;
     private String status;
+    private Double price;
+    private Double latitude;
+    private Double longitude;
     private List<String> timeSlots;
 
     public ParkingSlot() {
@@ -23,10 +26,16 @@ public class ParkingSlot {
             String slotId,
             String location,
             String status,
+            Double price,
+            Double latitude,
+            Double longitude,
             List<String> timeSlots) {
         this.slotId = slotId;
         this.location = location;
         this.status = status;
+        this.price = price;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.timeSlots = timeSlots;
     }
 
@@ -56,6 +65,30 @@ public class ParkingSlot {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 
     public List<String> getTimeSlots() {
