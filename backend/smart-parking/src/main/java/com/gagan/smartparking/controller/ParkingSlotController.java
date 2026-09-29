@@ -3,7 +3,15 @@ package com.gagan.smartparking.controller;
 import com.gagan.smartparking.model.ParkingSlot;
 import com.gagan.smartparking.repository.ParkingSlotRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +54,10 @@ public class ParkingSlotController {
         slot.setSlotId(updatedSlot.getSlotId());
         slot.setLocation(updatedSlot.getLocation());
         slot.setStatus(updatedSlot.getStatus());
+        slot.setPrice(updatedSlot.getPrice());
+        slot.setLatitude(updatedSlot.getLatitude());
+        slot.setLongitude(updatedSlot.getLongitude());
+        slot.setTimeSlots(updatedSlot.getTimeSlots());
 
         return ResponseEntity.ok(parkingSlotRepository.save(slot));
     }

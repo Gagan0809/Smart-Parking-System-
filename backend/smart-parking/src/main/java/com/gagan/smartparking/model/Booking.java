@@ -17,6 +17,8 @@ public class Booking {
     private String exitDate;
     private String exitTime;
     private String timeRange;
+    private String userName;
+    private String userEmail;
 
     public Booking() {
     }
@@ -106,5 +108,21 @@ public class Booking {
 
     public void setTimeRange(String timeRange) {
         this.timeRange = timeRange;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }
