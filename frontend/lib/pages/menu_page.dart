@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
-import '../core/utils.dart';
+
 import '../controllers/parking_controller.dart';
-import '../widgets/common/page_header.dart';
+import '../core/utils.dart';
 import '../widgets/parking/menu_action_tile.dart';
-import 'nearest_parking_page.dart';
-import 'bookings_page.dart';
 import 'booking_history_page.dart';
+import 'bookings_page.dart';
+import 'nearest_parking_page.dart';
+import 'profile_page.dart';
 import 'welcome_page.dart';
 
 class MenuPage extends StatefulWidget {
@@ -22,6 +22,12 @@ class MenuPage extends StatefulWidget {
 }
 
 class _MenuPageState extends State<MenuPage> {
+  static const backgroundColor = Color(0xFFF5F6FA);
+  static const primaryBlue = Color(0xFF3269B3);
+  static const darkText = Color(0xFF303B4A);
+  static const secondaryText = Color(0xFF748093);
+  static const lightBlue = Color(0xFFE8EDF5);
+
   @override
   void initState() {
     super.initState();
@@ -46,23 +52,20 @@ class _MenuPageState extends State<MenuPage> {
     final bookingCount = widget.controller.bookings.length;
 
     return Scaffold(
-      backgroundColor: AppColors.navy,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            PageHeader(
-              title: 'Menu',
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
+            _header(),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
-                  22,
-                  10,
-                  22,
+                  20,
+                  16,
+                  20,
                   28,
                 ),
+                physics: const BouncingScrollPhysics(),
                 children: [
                   _buildProfileHeader(
                     userName,
@@ -70,7 +73,20 @@ class _MenuPageState extends State<MenuPage> {
                   ),
                   const SizedBox(height: 18),
                   MenuActionTile(
-                    icon: Icons.home,
+                    icon: Icons.person_rounded,
+                    title: 'Profile',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ProfilePage(
+                            controller: widget.controller,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  MenuActionTile(
+                    icon: Icons.home_rounded,
                     title: 'Find Parking',
                     onTap: () {
                       Navigator.of(context).pushAndRemoveUntil(
@@ -79,12 +95,12 @@ class _MenuPageState extends State<MenuPage> {
                             controller: widget.controller,
                           ),
                         ),
-                        (route) => false,
+                            (route) => false,
                       );
                     },
                   ),
                   MenuActionTile(
-                    icon: Icons.bookmark,
+                    icon: Icons.bookmark_rounded,
                     title: 'My Bookings',
                     badge: bookingCount == 0
                         ? null
@@ -100,7 +116,7 @@ class _MenuPageState extends State<MenuPage> {
                     },
                   ),
                   MenuActionTile(
-                    icon: Icons.history,
+                    icon: Icons.history_rounded,
                     title: 'Booking History',
                     onTap: () {
                       Navigator.of(context).push(
@@ -113,7 +129,7 @@ class _MenuPageState extends State<MenuPage> {
                     },
                   ),
                   MenuActionTile(
-                    icon: Icons.refresh,
+                    icon: Icons.refresh_rounded,
                     title: 'Reset Demo Data',
                     onTap: () {
                       widget.controller.resetDemoData();
@@ -126,7 +142,7 @@ class _MenuPageState extends State<MenuPage> {
                     },
                   ),
                   MenuActionTile(
-                    icon: Icons.info,
+                    icon: Icons.info_outline_rounded,
                     title: 'About',
                     onTap: () {
                       showAboutDialog(
@@ -142,7 +158,7 @@ class _MenuPageState extends State<MenuPage> {
                     },
                   ),
                   MenuActionTile(
-                    icon: Icons.logout,
+                    icon: Icons.logout_rounded,
                     title: 'Logout',
                     isDestructive: true,
                     onTap: () => _confirmLogout(context),
@@ -156,27 +172,97 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  Widget _buildProfileHeader(
-    String userName,
-    int bookingCount,
-  ) {
+  Widget _header() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.panel,
-        borderRadius: BorderRadius.circular(16),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(24),
+        ),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: Colors.white,
+          GestureDetector(
+            onTap: () => Navigator.of(context).maybePop(),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: lightBlue,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: darkText,
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
             child: Text(
-              AppUtils.avatarInitial(userName),
-              style: const TextStyle(
-                color: AppColors.authPrimary,
+              'Menu',
+              style: TextStyle(
+                color: darkText,
                 fontSize: 24,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: lightBlue,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.menu_rounded,
+              color: primaryBlue,
+              size: 24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(
+      String userName,
+      int bookingCount,
+      ) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: lightBlue,
+              borderRadius: BorderRadius.circular(19),
+            ),
+            child: Center(
+              child: Text(
+                AppUtils.avatarInitial(userName),
+                style: const TextStyle(
+                  color: primaryBlue,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ),
@@ -189,19 +275,18 @@ class _MenuPageState extends State<MenuPage> {
                   userName,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: darkText,
                     fontSize: 20,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 5),
                 Text(
                   '$bookingCount active booking${bookingCount == 1 ? '' : 's'}',
-                  style: TextStyle(
-                    color: Colors.white.withValues(
-                      alpha: 0.78,
-                    ),
-                    fontWeight: FontWeight.w700,
+                  style: const TextStyle(
+                    color: secondaryText,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -213,28 +298,57 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Future<void> _confirmLogout(
-    BuildContext context,
-  ) async {
+      BuildContext context,
+      ) async {
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Logout'),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: const Text(
+            'Logout',
+            style: TextStyle(
+              color: darkText,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           content: const Text(
             'Return to the welcome screen?',
+            style: TextStyle(
+              color: secondaryText,
+              fontSize: 15,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop(false);
               },
-              child: const Text('Stay'),
+              child: const Text(
+                'Stay',
+                style: TextStyle(
+                  color: secondaryText,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
             FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: primaryBlue,
+                foregroundColor: Colors.white,
+              ),
               onPressed: () {
                 Navigator.of(dialogContext).pop(true);
               },
-              child: const Text('Logout'),
+              child: const Text(
+                'Logout',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ],
         );
@@ -253,7 +367,7 @@ class _MenuPageState extends State<MenuPage> {
           controller: widget.controller,
         ),
       ),
-      (route) => false,
+          (route) => false,
     );
   }
 }

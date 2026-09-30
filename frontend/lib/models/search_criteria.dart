@@ -7,6 +7,9 @@ class SearchCriteria {
     required this.entryTime,
     required this.exitDate,
     required this.exitTime,
+    this.maxDistanceKm,
+    this.maxPrice,
+    this.availableOnly = false,
   });
 
   final String location;
@@ -14,4 +17,7 @@ class SearchCriteria {
   final TimeOfDay entryTime;
   final DateTime exitDate;
   final TimeOfDay exitTime;
+  final double? maxDistanceKm;
+  final double? maxPrice;
+  final bool availableOnly;
 }
