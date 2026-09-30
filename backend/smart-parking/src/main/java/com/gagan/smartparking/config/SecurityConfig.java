@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -30,12 +29,22 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
         configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "OPTIONS"
+        ));
         configuration.setAllowedHeaders(List.of("*"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 
@@ -43,33 +52,79 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .csrf(CsrfConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                .cors(cors ->
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
+                )
+
                 .formLogin(FormLoginConfigurer::disable)
+
                 .httpBasic(HttpBasicConfigurer::disable)
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
+
                 .authorizeHttpRequests(auth -> auth
+
+                        // Public user authentication endpoints
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/users/login",
                                 "/api/admin/login"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/parking-slots")
+
+                        // IoT endpoints:
+                        // Spring Security allows the request through.
+                        // IotController validates X-IOT-KEY.
+                        .requestMatchers("/api/iot/**")
+                        .permitAll()
+
+                        // WebSocket handshake endpoint
+                        .requestMatchers("/ws/**")
+                        .permitAll()
+
+                        // Parking slot access
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/parking-slots"
+                        )
                         .authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/parking-slots")
+
+                        // Parking slot creation
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/parking-slots"
+                        )
                         .hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/parking-slots/**")
+
+                        // Parking slot update
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/parking-slots/**"
+                        )
                         .hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/parking-slots/**")
+
+                        // Parking slot deletion
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/parking-slots/**"
+                        )
                         .hasRole("ADMIN")
+
+                        // All remaining admin endpoints
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
+
+                        // Everything else requires JWT authentication
                         .anyRequest()
                         .authenticated()
                 )
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
