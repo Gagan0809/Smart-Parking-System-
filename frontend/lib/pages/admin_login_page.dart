@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
+
 import '../controllers/parking_controller.dart';
+import '../core/constants.dart';
 import '../widgets/auth/auth_shell.dart';
 import '../widgets/auth/auth_text_field.dart';
 import '../widgets/common/primary_pill_button.dart';
@@ -21,6 +22,7 @@ class AdminLoginPage extends StatefulWidget {
 class _AdminLoginPageState extends State<AdminLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -63,12 +65,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
           ),
           const SizedBox(height: 32),
           PrimaryPillButton(
-            label: 'Admin Login',
+            label: _isLoading ? 'Signing in...' : 'Admin Login',
             onPressed: _login,
           ),
           const SizedBox(height: 14),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
             child: const Text(
               'Back',
               style: TextStyle(
@@ -83,19 +85,44 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     );
   }
 
-  void _login() {
+  Future<void> _login() async {
+    if (_isLoading) {
+      return;
+    }
+
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    final success = widget.controller.handleAdminAuthentication(
-      email,
-      password,
-    );
-
-    if (!success) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Invalid admin email or password'),
+          content: Text('Enter admin email and password'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final error = await widget.controller.loginAdmin(
+      email: email,
+      password: password,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
         ),
       );
       return;

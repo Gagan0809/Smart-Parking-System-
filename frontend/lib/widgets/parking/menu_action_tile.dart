@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
 
 class MenuActionTile extends StatelessWidget {
   const MenuActionTile({
@@ -17,55 +16,85 @@ class MenuActionTile extends StatelessWidget {
   final String? badge;
   final bool isDestructive;
 
+  static const primaryBlue = Color(0xFF3269B3);
+  static const darkText = Color(0xFF303B4A);
+  static const secondaryText = Color(0xFF748093);
+  static const lightBlue = Color(0xFFE8EDF5);
+
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive ? AppColors.occupied : Colors.white;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    final textColor = isDestructive ? Colors.red : darkText;
+    final iconBackground =
+    isDestructive ? const Color(0xFFFFEEEE) : lightBlue;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Material(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
           onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 13,
+            ),
             child: Row(
               children: [
-                Icon(icon, color: color),
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: iconBackground,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isDestructive ? Colors.red : primaryBlue,
+                    size: 21,
+                  ),
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
                     title,
                     style: TextStyle(
-                      color: color,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0,
+                      color: textColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-                if (badge != null)
+                if (badge != null) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 9,
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.brightBlue,
-                      borderRadius: BorderRadius.circular(20),
+                      color: lightBlue,
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       badge!,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0,
+                        color: primaryBlue,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
-                const SizedBox(width: 8),
-                Icon(Icons.chevron_right, color: color),
+                  const SizedBox(width: 10),
+                ],
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDestructive ? Colors.red : secondaryText,
+                  size: 22,
+                ),
               ],
             ),
           ),
