@@ -27,7 +27,7 @@ public class IotController {
 
     public IotController(
             ParkingRealtimeService parkingRealtimeService,
-            @Value("${iot.device-key:dev-iot-key}") String iotDeviceKey) {
+            @Value("${iot.device-key}") String iotDeviceKey) {
         this.parkingRealtimeService = parkingRealtimeService;
         this.iotDeviceKey = iotDeviceKey;
     }
