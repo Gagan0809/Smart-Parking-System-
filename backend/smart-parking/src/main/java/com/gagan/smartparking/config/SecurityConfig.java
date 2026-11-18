@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -30,45 +29,59 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        );
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+
         http
                 .csrf(CsrfConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(FormLoginConfigurer::disable)
                 .httpBasic(HttpBasicConfigurer::disable)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/users/login",
                                 "/api/admin/login"
                         ).permitAll()
+
+                        .requestMatchers("/api/iot/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/parking-slots")
                         .authenticated()
+
                         .requestMatchers(HttpMethod.POST, "/api/parking-slots")
                         .hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.PUT, "/api/parking-slots/**")
                         .hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.DELETE, "/api/parking-slots/**")
                         .hasRole("ADMIN")
+
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
-                        .anyRequest()
-                        .authenticated()
+
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(
                         jwtAuthenticationFilter,
