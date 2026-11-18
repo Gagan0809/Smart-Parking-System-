@@ -40,7 +40,6 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-
               Container(
                 width: 58,
                 height: 58,
@@ -61,9 +60,7 @@ class _LoginPageState extends State<LoginPage> {
                   size: 30,
                 ),
               ),
-
               const SizedBox(height: 28),
-
               const Text(
                 'Welcome back',
                 style: TextStyle(
@@ -73,9 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                   letterSpacing: -0.8,
                 ),
               ),
-
               const SizedBox(height: 10),
-
               const Text(
                 'Sign in to manage your parking bookings.',
                 style: TextStyle(
@@ -84,9 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 1.5,
                 ),
               ),
-
               const SizedBox(height: 42),
-
               const Text(
                 'EMAIL ADDRESS',
                 style: TextStyle(
@@ -96,18 +89,14 @@ class _LoginPageState extends State<LoginPage> {
                   letterSpacing: 1,
                 ),
               ),
-
               const SizedBox(height: 10),
-
               AuthTextField(
                 controller: _emailController,
                 hintText: 'Enter your email',
                 keyboardType: TextInputType.emailAddress,
                 validator: AppUtils.validateEmail,
               ),
-
               const SizedBox(height: 24),
-
               const Text(
                 'PASSWORD',
                 style: TextStyle(
@@ -117,18 +106,14 @@ class _LoginPageState extends State<LoginPage> {
                   letterSpacing: 1,
                 ),
               ),
-
               const SizedBox(height: 10),
-
               AuthTextField(
                 controller: _passwordController,
                 hintText: 'Enter your password',
                 obscureText: true,
                 validator: AppUtils.validatePassword,
               ),
-
               const SizedBox(height: 36),
-
               if (_isLoading)
                 const Center(
                   child: CircularProgressIndicator(),
@@ -138,12 +123,12 @@ class _LoginPageState extends State<LoginPage> {
                   label: 'Login',
                   onPressed: _submit,
                 ),
-
               const SizedBox(height: 20),
-
               Center(
                 child: TextButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: _isLoading
+                      ? null
+                      : () => Navigator.of(context).pop(),
                   icon: const Icon(
                     Icons.arrow_back_rounded,
                     size: 18,
@@ -157,9 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const Spacer(),
-
               Center(
                 child: Text(
                   'SMART PARKING SYSTEM',
@@ -171,7 +154,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 18),
             ],
           ),
@@ -180,28 +162,49 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _submit() {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
 
     setState(() {
       _isLoading = true;
     });
 
-    final emailName = _emailController.text.trim().split('@').first;
+    final error = await widget.controller.loginUser(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
 
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
-      widget.controller.handleAuthentication(emailName);
+    setState(() {
+      _isLoading = false;
+    });
 
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (_) => NearestParkingPage(
-            controller: widget.controller,
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.redAccent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
-            (route) => false,
       );
-    });
+      return;
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => NearestParkingPage(
+          controller: widget.controller,
+        ),
+      ),
+          (route) => false,
+    );
   }
 }

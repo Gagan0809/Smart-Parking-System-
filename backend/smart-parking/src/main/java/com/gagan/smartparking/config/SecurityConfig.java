@@ -37,9 +37,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(false);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
@@ -50,9 +48,7 @@ public class SecurityConfig {
 
         http
                 .csrf(CsrfConfigurer::disable)
-                .cors(cors ->
-                        cors.configurationSource(corsConfigurationSource())
-                )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(FormLoginConfigurer::disable)
                 .httpBasic(HttpBasicConfigurer::disable)
                 .sessionManagement(session ->

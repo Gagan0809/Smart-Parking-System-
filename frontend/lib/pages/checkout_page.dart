@@ -4,6 +4,7 @@ import '../controllers/parking_controller.dart';
 import '../core/utils.dart';
 import '../models/parking_slot.dart';
 import '../models/search_criteria.dart';
+import '../services/notification_service.dart';
 import '../widgets/common/action_button.dart';
 import 'booking_confirmation_page.dart';
 
@@ -29,6 +30,7 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   String _paymentMethod = 'UPI';
+  bool _isProcessing = false;
 
   double get serviceFee => 5;
 
@@ -78,7 +80,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         label: 'Pay ₹${finalTotal.toStringAsFixed(0)}',
                         color: _blue,
                         foregroundColor: Colors.white,
-                        onPressed: _payNow,
+                        onPressed: () {
+                          if (!_isProcessing) {
+                            _payNow();
+                          }
+                        },
                       ),
                     ),
                   ],
@@ -439,7 +445,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: selected ? _blue.withValues(alpha: 0.12) : _iconBackground,
+                color: selected
+                    ? _blue.withValues(alpha: 0.12)
+                    : _iconBackground,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -570,14 +578,103 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return '$hours hr $minutes min';
   }
 
-  void _payNow() {
-    final booking = widget.controller.bookSlot(
+  Future<void> _payNow() async {
+    if (_isProcessing) {
+      return;
+    }
+
+    setState(() {
+      _isProcessing = true;
+    });
+
+    final result = await widget.controller.bookSlot(
       slot: widget.slot,
       criteria: widget.criteria,
       timeRange:
-      '${AppUtils.formatTimeOfDay(widget.criteria.entryTime)} - '
+          '${AppUtils.formatTimeOfDay(widget.criteria.entryTime)} - '
           '${AppUtils.formatTimeOfDay(widget.criteria.exitTime)}',
     );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (!result.success || result.booking == null) {
+      setState(() {
+        _isProcessing = false;
+      });
+
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          title: Text(
+            result.conflict ? 'Slot Already Booked' : 'Booking Failed',
+            style: const TextStyle(
+              color: _primaryText,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          content: Text(
+            result.message,
+            style: const TextStyle(
+              color: _secondaryText,
+              height: 1.45,
+            ),
+          ),
+          actions: [
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: _blue,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final booking = result.booking!;
+
+    final entryDateTime = DateTime(
+      widget.criteria.entryDate.year,
+      widget.criteria.entryDate.month,
+      widget.criteria.entryDate.day,
+      widget.criteria.entryTime.hour,
+      widget.criteria.entryTime.minute,
+    );
+
+    final exitDateTime = DateTime(
+      widget.criteria.exitDate.year,
+      widget.criteria.exitDate.month,
+      widget.criteria.exitDate.day,
+      widget.criteria.exitTime.hour,
+      widget.criteria.exitTime.minute,
+    );
+
+    await NotificationService.instance.showBookingConfirmationNotification(
+      slotName: 'Slot ${widget.slot.id}',
+      locationName: widget.criteria.location,
+      entryTime: entryDateTime,
+      exitTime: exitDateTime,
+    );
+
+    await NotificationService.instance.scheduleSessionExpiryNotification(
+      notificationId: booking.id.hashCode.abs(),
+      slotName: 'Slot ${widget.slot.id}',
+      exitTime: exitDateTime,
+      minutesBefore: 15,
+    );
+
+    if (!mounted) {
+      return;
+    }
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -591,4 +688,5 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ),
     );
   }
+
 }

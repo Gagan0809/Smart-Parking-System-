@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/parking_controller.dart';
+import 'admin_bookings_page.dart';
 import 'admin_locations_page.dart';
 import 'admin_slots_page.dart';
+import 'admin_users_page.dart';
 import 'welcome_page.dart';
 
 class AdminDashboardPage extends StatelessWidget {
@@ -22,32 +24,7 @@ class AdminDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!controller.isAdmin) {
-      return Scaffold(
-        backgroundColor: backgroundColor,
-        body: SafeArea(
-          child: Column(
-            children: [
-              _header(
-                context,
-                'Access Denied',
-                    () => Navigator.of(context).maybePop(),
-              ),
-              const Expanded(
-                child: Center(
-                  child: Text(
-                    'Admin access required',
-                    style: TextStyle(
-                      color: darkText,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _accessDeniedPage(context);
     }
 
     return Scaffold(
@@ -58,21 +35,38 @@ class AdminDashboardPage extends StatelessWidget {
             _header(
               context,
               'Admin Dashboard',
-                  () => _confirmLogout(context),
+              () => _confirmLogout(context),
+              showBack: false,
             ),
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 30),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
                 children: [
-                  _buildHeader(),
+                  const Text(
+                    'System Management',
+                    style: TextStyle(
+                      color: darkText,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Manage locations, slots, users and bookings.',
+                    style: TextStyle(
+                      color: secondaryText,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   _buildAdminTile(
-                    context,
-                    Icons.location_on_rounded,
-                    'Parking Locations',
-                    'Manage parking locations',
-                        () {
+                    context: context,
+                    icon: Icons.location_on_rounded,
+                    title: 'Parking Locations',
+                    subtitle: 'Add, edit and remove parking locations',
+                    onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => AdminLocationsPage(
@@ -83,11 +77,11 @@ class AdminDashboardPage extends StatelessWidget {
                     },
                   ),
                   _buildAdminTile(
-                    context,
-                    Icons.local_parking_rounded,
-                    'Parking Slots',
-                    'Manage parking slots',
-                        () {
+                    context: context,
+                    icon: Icons.local_parking_rounded,
+                    title: 'Parking Slots',
+                    subtitle: 'Add, edit, delete and update slot status',
+                    onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => AdminSlotsPage(
@@ -98,30 +92,30 @@ class AdminDashboardPage extends StatelessWidget {
                     },
                   ),
                   _buildAdminTile(
-                    context,
-                    Icons.people_rounded,
-                    'Users',
-                    'Manage registered users',
-                        () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Users management page will be connected next',
+                    context: context,
+                    icon: Icons.people_rounded,
+                    title: 'Users',
+                    subtitle: 'View and manage registered users',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => AdminUsersPage(
+                            controller: controller,
                           ),
                         ),
                       );
                     },
                   ),
                   _buildAdminTile(
-                    context,
-                    Icons.book_online_rounded,
-                    'Bookings',
-                    'Manage parking bookings',
-                        () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Admin bookings page will be connected next',
+                    context: context,
+                    icon: Icons.book_online_rounded,
+                    title: 'Bookings',
+                    subtitle: 'View and cancel parking bookings',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => AdminBookingsPage(
+                            controller: controller,
                           ),
                         ),
                       );
@@ -138,32 +132,65 @@ class AdminDashboardPage extends StatelessWidget {
     );
   }
 
+  Widget _accessDeniedPage(BuildContext context) {
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _header(
+              context,
+              'Access Denied',
+              () => Navigator.of(context).maybePop(),
+            ),
+            const Expanded(
+              child: Center(
+                child: Text(
+                  'Admin access required',
+                  style: TextStyle(
+                    color: darkText,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _header(
-      BuildContext context,
-      String title,
-      VoidCallback onBack,
-      ) {
+    BuildContext context,
+    String title,
+    VoidCallback onBack,
+    {bool showBack = true}
+  ) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
       color: Colors.white,
       child: Row(
         children: [
-          GestureDetector(
-            onTap: onBack,
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: lightBlue,
-                borderRadius: BorderRadius.circular(14),
+          if (showBack)
+            GestureDetector(
+              onTap: onBack,
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: lightBlue,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: darkText,
+                  size: 25,
+                ),
               ),
-              child: const Icon(
-                Icons.arrow_back_rounded,
-                color: darkText,
-                size: 25,
-              ),
-            ),
-          ),
+            )
+          else
+            const SizedBox(width: 44, height: 44),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
@@ -199,73 +226,13 @@ class AdminDashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: lightBlue,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.admin_panel_settings_rounded,
-              color: primaryBlue,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Admin Panel',
-                  style: TextStyle(
-                    color: darkText,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  'Manage your smart parking system',
-                  style: TextStyle(
-                    color: secondaryText,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdminTile(
-      BuildContext context,
-      IconData icon,
-      String title,
-      String subtitle,
-      VoidCallback onTap,
-      ) {
+  Widget _buildAdminTile({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
@@ -453,7 +420,11 @@ class AdminDashboardPage extends StatelessWidget {
     );
 
     if (shouldLogout == true && context.mounted) {
-      controller.logout();
+      await controller.logout();
+
+      if (!context.mounted) {
+        return;
+      }
 
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
@@ -461,7 +432,7 @@ class AdminDashboardPage extends StatelessWidget {
             controller: controller,
           ),
         ),
-            (route) => false,
+        (route) => false,
       );
     }
   }

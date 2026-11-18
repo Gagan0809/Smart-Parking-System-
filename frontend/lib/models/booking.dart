@@ -10,6 +10,8 @@ class Booking {
     required this.exitDate,
     required this.exitTime,
     required this.timeRange,
+    this.userName,
+    this.userEmail,
   });
 
   final String id;
@@ -20,4 +22,6 @@ class Booking {
   final DateTime exitDate;
   final TimeOfDay exitTime;
   final String timeRange;
+  final String? userName;
+  final String? userEmail;
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
+
 import '../controllers/parking_controller.dart';
 import '../models/booking.dart';
-import '../widgets/common/page_header.dart';
 
 class BookingHistoryPage extends StatefulWidget {
   const BookingHistoryPage({
@@ -17,6 +16,12 @@ class BookingHistoryPage extends StatefulWidget {
 }
 
 class _BookingHistoryPageState extends State<BookingHistoryPage> {
+  static const backgroundColor = Color(0xFFF5F6FA);
+  static const primaryBlue = Color(0xFF3269B3);
+  static const darkText = Color(0xFF303B4A);
+  static const secondaryText = Color(0xFF748093);
+  static const lightBlue = Color(0xFFE8EDF5);
+
   @override
   void initState() {
     super.initState();
@@ -40,32 +45,29 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     final bookings = widget.controller.bookings;
 
     return Scaffold(
-      backgroundColor: AppColors.navy,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
-            PageHeader(
-              title: 'Booking History',
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
+            _header(),
             Expanded(
               child: bookings.isEmpty
                   ? _buildEmptyState()
                   : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(
-                        22,
-                        10,
-                        22,
-                        28,
-                      ),
-                      itemCount: bookings.length,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(height: 14),
-                      itemBuilder: (context, index) {
-                        final booking = bookings[index];
-                        return _buildHistoryCard(booking);
-                      },
-                    ),
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  16,
+                  20,
+                  28,
+                ),
+                physics: const BouncingScrollPhysics(),
+                itemCount: bookings.length,
+                separatorBuilder: (_, _) =>
+                const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  return _buildHistoryCard(bookings[index]);
+                },
+              ),
             ),
           ],
         ),
@@ -73,48 +75,105 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
+  Widget _header() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(24),
+        ),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.of(context).maybePop(),
+            child: Container(
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: AppColors.panel,
-                borderRadius: BorderRadius.circular(40),
+                color: lightBlue,
+                borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(
-                Icons.history,
-                color: Colors.white,
-                size: 40,
+                Icons.arrow_back_rounded,
+                color: darkText,
+                size: 24,
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'No Booking History',
-              textAlign: TextAlign.center,
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Text(
+              'Booking History',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
+                color: darkText,
+                fontSize: 24,
                 fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Your completed or previous bookings will appear here.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.70),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+          ),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: lightBlue,
+              borderRadius: BorderRadius.circular(14),
             ),
-          ],
-        ),
+            child: const Icon(
+              Icons.history_rounded,
+              color: primaryBlue,
+              size: 24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+      child: Column(
+        children: [
+          const Spacer(),
+          Container(
+            width: 92,
+            height: 92,
+            decoration: BoxDecoration(
+              color: lightBlue,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: const Icon(
+              Icons.history_rounded,
+              color: primaryBlue,
+              size: 48,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'No Booking History',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: darkText,
+              fontSize: 25,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Your completed or previous bookings will appear here.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: secondaryText,
+              fontSize: 15,
+              height: 1.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const Spacer(),
+        ],
       ),
     );
   }
@@ -123,11 +182,15 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.panel,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,16 +198,16 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
           Row(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(14),
+                  color: lightBlue,
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 child: const Icon(
-                  Icons.local_parking,
-                  color: Colors.white,
-                  size: 25,
+                  Icons.local_parking_rounded,
+                  color: primaryBlue,
+                  size: 26,
                 ),
               ),
               const SizedBox(width: 12),
@@ -156,7 +219,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                       'Booking ${booking.id}',
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: darkText,
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                       ),
@@ -164,8 +227,8 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                     const SizedBox(height: 4),
                     Text(
                       'Parking Slot ${booking.slotId}',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.70),
+                      style: const TextStyle(
+                        color: secondaryText,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -177,31 +240,31 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
             ],
           ),
           const SizedBox(height: 18),
-          const Divider(
+          Container(
             height: 1,
-            color: Colors.white24,
+            color: const Color(0xFFE8EBF0),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           _infoRow(
             Icons.confirmation_number_outlined,
             'Booking ID',
             booking.id,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           _infoRow(
             Icons.local_parking_outlined,
             'Slot',
             booking.slotId,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           _infoRow(
             Icons.location_on_outlined,
             'Location',
             booking.location,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           _infoRow(
-            Icons.access_time,
+            Icons.access_time_rounded,
             'Time',
             booking.timeRange,
           ),
@@ -213,17 +276,17 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
   Widget _statusBadge() {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
+        horizontal: 11,
+        vertical: 7,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
+        color: lightBlue,
         borderRadius: BorderRadius.circular(20),
       ),
       child: const Text(
         'History',
         style: TextStyle(
-          color: Colors.white,
+          color: primaryBlue,
           fontSize: 11,
           fontWeight: FontWeight.w800,
         ),
@@ -232,22 +295,30 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
   }
 
   Widget _infoRow(
-    IconData icon,
-    String label,
-    String value,
-  ) {
+      IconData icon,
+      String label,
+      String value,
+      ) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: Colors.white70,
-          size: 19,
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: lightBlue,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: primaryBlue,
+            size: 18,
+          ),
         ),
         const SizedBox(width: 10),
         Text(
           '$label:',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.65),
+          style: const TextStyle(
+            color: secondaryText,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -257,8 +328,9 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
           child: Text(
             value,
             overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
             style: const TextStyle(
-              color: Colors.white,
+              color: darkText,
               fontSize: 13,
               fontWeight: FontWeight.w800,
             ),

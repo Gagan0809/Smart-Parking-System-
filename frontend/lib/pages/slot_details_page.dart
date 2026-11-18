@@ -39,7 +39,7 @@ class _SlotDetailsPageState extends State<SlotDetailsPage> {
   Widget build(BuildContext context) {
     final duration = _calculateDuration();
     final hours = duration.inMinutes / 60;
-    final total = hours * 40;
+    final total = hours * widget.slot.price;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
@@ -489,7 +489,7 @@ class _SlotDetailsPageState extends State<SlotDetailsPage> {
           const SizedBox(height: 15),
           _buildPriceRow(
             'Parking Rate',
-            '₹40 / hour',
+            '₹${widget.slot.price.toStringAsFixed(0)} / hour',
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 18),
@@ -590,7 +590,7 @@ class _SlotDetailsPageState extends State<SlotDetailsPage> {
     return exit.difference(entry);
   }
 
-  void _proceed() {
+  Future<void> _proceed() async {
     final duration = _calculateDuration();
 
     if (duration == Duration.zero) {
@@ -612,7 +612,26 @@ class _SlotDetailsPageState extends State<SlotDetailsPage> {
       exitTime: _exitTime,
     );
 
-    final total = (duration.inMinutes / 60) * 40;
+    final availability = await widget.controller.checkBookingAvailability(
+      slot: widget.slot,
+      criteria: updatedCriteria,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (!availability.available) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(availability.message),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
+
+    final total = (duration.inMinutes / 60) * widget.slot.price;
 
     Navigator.of(context).push(
       MaterialPageRoute(
